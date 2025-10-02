@@ -81,7 +81,11 @@ client.on('interactionCreate', async (interaction) => {
             // Construir el mensaje inicial con menciones
             let texto = "Morosos:\n";
             miembros.forEach(userId => {
-                texto += `<@${userId}> 4,331666666666667€ ${monkaGun}\n`;
+                if (userId == process.env.IdCristian) {
+                    texto += `<@${userId}> 8,663333333333333€ ${monkaGun}\n`;
+                } else {
+                    texto += `<@${userId}> 4,331666666666667€ ${monkaGun}\n`;
+                }
             });
         
             // ⚡ Enviar el mensaje de morosos como mensaje normal
