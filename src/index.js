@@ -66,28 +66,83 @@ client.on('interactionCreate', async (interaction) => {
             break;
 
         case 'morosos':
+            // Lista de IDs de usuarios implicados
             const miembros = [
                 process.env.IdLuffyRay,
+                // process.env.IdCristian,
+                // process.env.IdLexpiera,
+                // process.env.IdBajos,
             ];
         
-            const monkaGun = "<:monkagun:931290838586261555>";
-            const tarjetonId = "900711012053942272";
+            // Emojis
+            const monkaGun = "<:monkagun:931290838586261555>"; // Emoji inicial
+            const tarjetonId = "900711012053942272"; // ID del emoji custom para marcar pago
         
+            // Construir el mensaje inicial con menciones
             let texto = "Morosos:\n";
             miembros.forEach(userId => {
                 texto += `<@${userId}> 4,331666666666667€ ${monkaGun}\n`;
             });
         
-            // ⚡ Enviar mensaje normal
+            // ⚡ Enviar el mensaje de morosos como mensaje normal
             const msg = await interaction.channel.send({ content: texto });
         
+            // ⚡ Añadir reacción inicial
             await msg.react(tarjetonId);
         
-            // Guardar el mensaje y miembros en memoria
-            const estado = { msgId: msg.id, miembros: miembros, yaPagaron: new Set() };
-            client.morososEstado = client.morososEstado || {};
-            client.morososEstado[msg.id] = estado;
+            // ⚡ Conjunto para controlar quién ya reaccionó
+            const yaPagaron = new Set();
+        
+            // ⚡ Collector de reacciones
+            const collector = msg.createReactionCollector({
+                filter: (reaction, user) =>
+                    !user.bot &&
+                    miembros.includes(user.id) &&
+                    reaction.emoji.id === tarjetonId,
+                dispose: true,
+            });
+        
+            // ⚡ Al detectar una reacción
+            collector.on("collect", async (reaction, user) => {
+                if (yaPagaron.has(user.id)) return;
+                yaPagaron.add(user.id);
+        
+                // Reemplazar emoji de la línea del usuario
+                let nuevasLineas = msg.content
+                    .split("\n")
+                    .map(linea =>
+                        linea.includes(`<@${user.id}>`)
+                            ? linea.replace(monkaGun, `<:pepotarjeton:${tarjetonId}>`)
+                            : linea
+                    )
+                    .join("\n");
+        
+                await msg.edit({ content: nuevasLineas });
+            });
+        
+            // ⚡ Opcional: manejar cuando se quita la reacción
+            collector.on("remove", async (reaction, user) => {
+                if (!yaPagaron.has(user.id)) return;
+        
+                yaPagaron.delete(user.id);
+        
+                let nuevasLineas = msg.content
+                    .split("\n")
+                    .map(linea =>
+                        linea.includes(`<@${user.id}>`)
+                            ? linea.replace(`<:pepotarjeton:${tarjetonId}>`, monkaGun)
+                            : linea
+                    )
+                    .join("\n");
+        
+                await msg.edit({ content: nuevasLineas });
+            });
+        
+            // ⚡ Responder al slash command para cumplir con la interacción
+            await interaction.reply({ content: "Mensaje de morosos enviado ✅", ephemeral: true });
+        
             break;
+
 
         default:
             break;
