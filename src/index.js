@@ -67,63 +67,55 @@ client.on('interactionCreate', async (interaction) => {
         case 'morosos':
             const miembros = [
                 process.env.IdLuffyRay,
-                // process.env.IdCristian,
-                // process.env.IdLexpiera,
-                // process.env.IdBajos,
             ];
         
-            const monkaGun = "<:monkagun:931290838586261555>"; // Emoji inicial
-            const tarjetonId = "900711012053942272"; // ID del emoji custom para reemplazar
+            const monkaGun = "<:monkagun:931290838586261555>";
+            const tarjetonId = "900711012053942272";
         
-            // Construir mensaje inicial con menciones
             let texto = "Morosos:\n";
             miembros.forEach(userId => {
                 texto += `<@${userId}> 4,331666666666667€ ${monkaGun}\n`;
             });
         
-            // Enviar mensaje y guardar referencia
-            const msg = await interaction.reply({ content: texto, fetchReply: true });
+            // ⚡ Enviar mensaje normal
+            const msg = await interaction.channel.send({ content: texto });
         
-            // Reaccionar al mensaje con el emoji tarjeton
             await msg.react(tarjetonId);
         
-            // Conjunto para controlar quién ya reaccionó
-            const yaPagaron = new Set();
-        
-            // Collector de reacciones
-            const collector = msg.createReactionCollector({
-                filter: (reaction, user) => 
-                    !user.bot &&
-                    miembros.includes(user.id) &&
-                    reaction.emoji.id === tarjetonId,
-                dispose: true,
-            });
-        
-            collector.on("collect", async (reaction, user) => {
-                if (yaPagaron.has(user.id)) return;
-                yaPagaron.add(user.id);
-        
-                // Actualizar mensaje reemplazando el emoji de ese usuario
-                let nuevasLineas = msg.content
-                    .split("\n")
-                    .map(linea => 
-                        linea.includes(`<@${user.id}>`)
-                            ? linea.replace(monkaGun, `<:pepotarjeton:${tarjetonId}>`)
-                            : linea
-                    )
-                    .join("\n");
-        
-                await msg.edit({ content: nuevasLineas });
-            });
-        
+            // Guardar el mensaje y miembros en memoria
+            const estado = { msgId: msg.id, miembros: miembros, yaPagaron: new Set() };
+            client.morososEstado = client.morososEstado || {};
+            client.morososEstado[msg.id] = estado;
             break;
-
-
 
         default:
             break;
     }
 });
 
+client.on('messageReactionAdd', async (reaction, user) => {
+    if (user.bot) return;
+    if (!reaction.message.guild) return;
+
+    const estado = client.morososEstado?.[reaction.message.id];
+    if (!estado) return; // no es un mensaje de morosos
+    if (!estado.miembros.includes(user.id)) return;
+    if (estado.yaPagaron.has(user.id)) return;
+
+    // solo custom emoji tarjeton
+    if (reaction.emoji.id !== "900711012053942272") return;
+
+    estado.yaPagaron.add(user.id);
+
+    // Actualizar mensaje
+    let nuevasLineas = reaction.message.content
+        .split("\n")
+        .map(linea =>
+            linea.includes(`<@${user.id}>`) ? linea.replace(monkaGun, `<:pepotarjeton:900711012053942272>`) : linea
+        )
+        .join("\n");
+
+    await reaction.message.edit({ content: nuevasLineas });
+});
 
 client.login(process.env.TOKEN);
