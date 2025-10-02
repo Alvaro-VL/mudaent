@@ -69,9 +69,9 @@ client.on('interactionCreate', async (interaction) => {
             // Lista de IDs de usuarios implicados
             const miembros = [
                 process.env.IdLuffyRay,
-                // process.env.IdCristian,
-                // process.env.IdLexpiera,
-                // process.env.IdBajos,
+                process.env.IdCristian,
+                process.env.IdLexpiera,
+                process.env.IdBajos,
             ];
         
             // Emojis
