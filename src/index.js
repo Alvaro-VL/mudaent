@@ -65,61 +65,62 @@ client.on('interactionCreate', (interaction) => {
             break;
 
         case 'morosos':
-            // Lista de usuarios mencionados
             const miembros = [
-                //process.env.IdCristian, // ID de usuario 1
-                process.env.IdLuffyRay, // ID de usuario 2
+                process.env.IdLuffyRay,
+                //process.env.IdCristian,
                 //process.env.IdLexpiera,
-                //process.env.IdBajos, // ID de usuario 3
+                //process.env.IdBajos,
             ];
-
-            // Construimos el mensaje con emoji inicial
+        
             let texto = "Morosos:\n";
-            let monkaGun = "<:monkagun:931290838586261555>"; // tu emoticono de servidor
+            let monkaGun = "<:monkagun:931290838586261555>";
             let tarjeton = "<:pepotarjeton:900711012053942272>";
+        
             miembros.forEach((m) => {
-                // Sacamos solo la ID numérica de la mención
                 const userId = m.replace(/[<@!>]/g, "");
-
+        
                 if (userId === process.env.IdCristian) {
                     texto += `${m} 8,663333333333333€ ${monkaGun}\n`;
                 } else {
                     texto += `${m} 4,331666666666667€ ${monkaGun}\n`;
                 }
             });
-
-            // Enviar mensaje
-            interaction.channel.send(texto);
-
-            // Reaccion inicial (la que los usuarios deben pulsar)
-            interaction.channel.react(`${tarjeton}`);
-
-            // Guardamos estado de quién ya reaccionó
+        
+            // ⚡ Responder y guardar el mensaje
+            const msg = await interaction.reply({ content: texto, fetchReply: true });
+        
+            // ⚡ Reaccionar al mensaje
+            await msg.react(tarjeton);
+        
             const yaPagaron = new Set();
-
-            // Escuchar reacciones
+        
+            // ⚡ Crear collector de reacciones
             const collector = msg.createReactionCollector({
                 filter: (reaction, user) =>
-                    reaction.emoji.name === `${tarjeton}` && !user.bot && miembros.includes(`<@${user.id}>`),
-                    dispose: true,
+                    reaction.emoji.name === "pepotarjeton" &&
+                    !user.bot &&
+                    miembros.includes(`<@${user.id}>`),
+                dispose: true,
             });
-
+        
             collector.on("collect", async (reaction, user) => {
-                if (yaPagaron.has(user.id)) return; // Evita repeticiones
+                if (yaPagaron.has(user.id)) return;
                 yaPagaron.add(user.id);
-
-                // Editar el mensaje y cambiar el emoji de la línea del usuario
+        
+                // Reemplazar emoji en la línea correspondiente
                 let nuevasLineas = msg.content
                     .split("\n")
                     .map((linea) =>
-                        linea.includes(`<@${user.id}>`) ? linea.replace(`${monkaGun}`, `${tarjeton}`) : linea
+                        linea.includes(`<@${user.id}>`)
+                            ? linea.replace(monkaGun, tarjeton)
+                            : linea
                     )
                     .join("\n");
-
+        
                 await msg.edit(nuevasLineas);
             });
             break;
-    
+
         default:
             break;
     }
