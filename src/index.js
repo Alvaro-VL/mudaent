@@ -67,26 +67,35 @@ client.on('interactionCreate', async (interaction) => {
         case 'morosos':
             const miembros = [
                 process.env.IdLuffyRay,
+                // process.env.IdCristian,
+                // process.env.IdLexpiera,
+                // process.env.IdBajos,
             ];
         
-            let texto = "Morosos:\n";
-            let monkaGun = "<:monkagun:931290838586261555>";
-            let tarjeton = "900711012053942272"; // ID del emoji custom
+            const monkaGun = "<:monkagun:931290838586261555>"; // Emoji inicial
+            const tarjetonId = "900711012053942272"; // ID del emoji custom para reemplazar
         
-            miembros.forEach((userId) => {
+            // Construir mensaje inicial con menciones
+            let texto = "Morosos:\n";
+            miembros.forEach(userId => {
                 texto += `<@${userId}> 4,331666666666667€ ${monkaGun}\n`;
             });
         
+            // Enviar mensaje y guardar referencia
             const msg = await interaction.reply({ content: texto, fetchReply: true });
-            await msg.react(tarjeton);
         
+            // Reaccionar al mensaje con el emoji tarjeton
+            await msg.react(tarjetonId);
+        
+            // Conjunto para controlar quién ya reaccionó
             const yaPagaron = new Set();
         
+            // Collector de reacciones
             const collector = msg.createReactionCollector({
-                filter: (reaction, user) =>
-                    reaction.emoji.id === tarjeton &&
+                filter: (reaction, user) => 
                     !user.bot &&
-                    miembros.includes(user.id),
+                    miembros.includes(user.id) &&
+                    reaction.emoji.id === tarjetonId,
                 dispose: true,
             });
         
@@ -94,18 +103,21 @@ client.on('interactionCreate', async (interaction) => {
                 if (yaPagaron.has(user.id)) return;
                 yaPagaron.add(user.id);
         
+                // Actualizar mensaje reemplazando el emoji de ese usuario
                 let nuevasLineas = msg.content
                     .split("\n")
-                    .map((linea) =>
+                    .map(linea => 
                         linea.includes(`<@${user.id}>`)
-                            ? linea.replace(monkaGun, `<:pepotarjeton:${tarjeton}>`)
+                            ? linea.replace(monkaGun, `<:pepotarjeton:${tarjetonId}>`)
                             : linea
                     )
                     .join("\n");
         
-                await msg.edit(nuevasLineas);
+                await msg.edit({ content: nuevasLineas });
             });
+        
             break;
+
 
 
         default:
