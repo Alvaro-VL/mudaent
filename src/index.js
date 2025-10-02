@@ -9,6 +9,7 @@ const client = new Client({
         IntentsBitField.Flags.MessageContent,
         IntentsBitField.Flags.MessageContent,
         IntentsBitField.Flags.GuildEmojisAndStickers,
+        IntentsBitField.Flags.GuildMessageReactions,
     ]
 });
 
