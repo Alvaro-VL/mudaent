@@ -48,19 +48,19 @@ client.on('messageCreate' , (message) => {
 })
 
 //Comandos
-client.on('interactionCreate', (interaction) => {
+client.on('interactionCreate', async (interaction) => {
     if (!interaction.isChatInputCommand()) return;
 
     let $comando = interaction.commandName;
 
     switch ($comando) {
         case 'bestwaifu':
-            interaction.channel.send("https://tenor.com/view/oshi-no-ko-kana-arima-arima-kana-oshi-no-ko-kana-arima-oshi-no-ko-arima-kana-gif-1759838810798484675");
+            await interaction.channel.send("https://tenor.com/view/oshi-no-ko-kana-arima-arima-kana-oshi-no-ko-kana-arima-oshi-no-ko-arima-kana-gif-1759838810798484675");
             break;
 
         case 'falso':
             let $falso = interaction.guild.members.cache.get(process.env.IdRuben);
-            interaction.reply('Hacking... <:hackerman:906165083451842571>');
+            await interaction.reply('Hacking... <:hackerman:906165083451842571>');
             $falso.setNickname('El más Falso');
             break;
 
@@ -90,7 +90,7 @@ client.on('interactionCreate', (interaction) => {
             const msg = await interaction.reply({ content: texto, fetchReply: true });
         
             // ⚡ Reaccionar al mensaje
-            await msg.react(tarjeton);
+            await msg.react("pepotarjeton"); // 👈 aquí pasamos solo el nombre del emoji si es custom
         
             const yaPagaron = new Set();
         
@@ -107,7 +107,6 @@ client.on('interactionCreate', (interaction) => {
                 if (yaPagaron.has(user.id)) return;
                 yaPagaron.add(user.id);
         
-                // Reemplazar emoji en la línea correspondiente
                 let nuevasLineas = msg.content
                     .split("\n")
                     .map((linea) =>
@@ -124,6 +123,7 @@ client.on('interactionCreate', (interaction) => {
         default:
             break;
     }
-})
+});
+
 
 client.login(process.env.TOKEN);
