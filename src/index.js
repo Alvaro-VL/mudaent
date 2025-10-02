@@ -67,39 +67,26 @@ client.on('interactionCreate', async (interaction) => {
         case 'morosos':
             const miembros = [
                 process.env.IdLuffyRay,
-                //process.env.IdCristian,
-                //process.env.IdLexpiera,
-                //process.env.IdBajos,
             ];
         
             let texto = "Morosos:\n";
             let monkaGun = "<:monkagun:931290838586261555>";
-            let tarjeton = "<:pepotarjeton:900711012053942272>";
+            let tarjeton = "900711012053942272"; // ID del emoji custom
         
-            miembros.forEach((m) => {
-                const userId = m.replace(/[<@!>]/g, "");
-        
-                if (userId === process.env.IdCristian) {
-                    texto += `${m} 8,663333333333333€ ${monkaGun}\n`;
-                } else {
-                    texto += `${m} 4,331666666666667€ ${monkaGun}\n`;
-                }
+            miembros.forEach((userId) => {
+                texto += `<@${userId}> 4,331666666666667€ ${monkaGun}\n`;
             });
         
-            // ⚡ Responder y guardar el mensaje
             const msg = await interaction.reply({ content: texto, fetchReply: true });
-        
-            // ⚡ Reaccionar al mensaje
-            await msg.react("pepotarjeton"); // 👈 aquí pasamos solo el nombre del emoji si es custom
+            await msg.react(tarjeton);
         
             const yaPagaron = new Set();
         
-            // ⚡ Crear collector de reacciones
             const collector = msg.createReactionCollector({
                 filter: (reaction, user) =>
-                    reaction.emoji.name === "pepotarjeton" &&
+                    reaction.emoji.id === tarjeton &&
                     !user.bot &&
-                    miembros.includes(`<@${user.id}>`),
+                    miembros.includes(user.id),
                 dispose: true,
             });
         
@@ -111,7 +98,7 @@ client.on('interactionCreate', async (interaction) => {
                     .split("\n")
                     .map((linea) =>
                         linea.includes(`<@${user.id}>`)
-                            ? linea.replace(monkaGun, tarjeton)
+                            ? linea.replace(monkaGun, `<:pepotarjeton:${tarjeton}>`)
                             : linea
                     )
                     .join("\n");
@@ -119,6 +106,7 @@ client.on('interactionCreate', async (interaction) => {
                 await msg.edit(nuevasLineas);
             });
             break;
+
 
         default:
             break;
